@@ -1,0 +1,17 @@
+#PODS
+#Lista imagens
+podman images
+
+#lista pods a correr
+podman ps
+
+#attach a container existente #interactive terminal
+podman -exec -it container_name /bin/bash
+
+#correr container em backgroup e port 8080
+podman run -d -p 8080 httpd
+
+#procurar containers
+podman search httpd
+
+#############################
