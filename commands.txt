@@ -134,5 +134,281 @@ drwxr-x---. 2 27 27 6 Apr 27 10:31 /home/student/local/mysql/items/
 [student@workstation ~]$ 
 
 
+#Depois de alterar o container
+[student@workstation containers]$ podman stop official-nginx
+official-nginx
+[student@workstation containers]$
+
+#Commit com autor - nome da imagem e novo nome com tag.
+[student@workstation containers]$ podman commit -a 'Virgilio' official-nginx do180/mynginx:V1.0-SNAPSHOT
+Getting image source signatures
+Copying blob ffc9b21953f4 skipped: already exists  
+Copying blob 2f4accd375d9 skipped: already exists  
+Copying blob 6c7de695ede3 skipped: already exists  
+Copying blob 635e08fa131b done  
+Copying config caf72218f5 done  
+Writing manifest to image destination
+Storing signatures
+caf72218f595f0d3ca3ffed9f7626bdd703d3296d1fb6739a8213b80df936452
+[student@workstation containers]$ 
+
+#Start com novo nome
+[student@workstation containers]$ podman run -d --name official-nginx-dev -p 8080:80 do180/mynginx
+c2b6dbf4c4ab0e9ffb6a905fab4ff1944166caf808323aa4f99dca197bedcebb
+[student@workstation containers]$ 
+
 
 #############################
+#############################
+#############################
+#Criar Containerfile
+[student@workstation dockerfile-create]$ cat Containerfile 
+FROM ubi8/ubi:8.5
+MAINTAINER <Virgilio Araujo>
+LABEL description="A custom Apache container based on UBI 8"
+RUN yum install -y httpd && \
+    yum clean all
+RUN echo "Hello from Containerfile" > /var/www/html/index.html
+EXPOSE 80
+CMD ["httpd", "-D", "FOREGROUND" ]
+[student@workstation dockerfile-create]$ 
+
+#Build do Containerfile
+[student@workstation dockerfile-create]$ podman build --layers=false -t do180/apache .
+STEP 1/7: FROM ubi8/ubi:8.5
+Resolved "ubi8/ubi" as an alias (/etc/containers/registries.conf.d/001-rhel-shortnames.conf)
+Trying to pull registry.access.redhat.com/ubi8/ubi:8.5...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob 38dd71adcfc1 [--------------------------------------] 0.0b / 0.0b
+Copying blob 0a21bb5475ea [--------------------------------------] 0.0b / 77.7MiB
+Copying config e0c227e997 done  
+Writing manifest to image destination
+Storing signatures
+STEP 2/7: MAINTAINER <Virgilio Araujo>
+STEP 3/7: LABEL description="A custom Apache container based on UBI 8"
+STEP 4/7: RUN yum install -y httpd &&     yum clean all
+Updating Subscription Management repositories.
+Unable to read consumer identity
+Subscription Manager is operating in container mode.
+
+This system is not registered with an entitlement server. You can use subscription-manager to register.
+
+Red Hat Universal Base Image 8 (RPMs) - BaseOS  2.7 MB/s | 800 kB     00:00    
+Red Hat Universal Base Image 8 (RPMs) - AppStre  36 MB/s | 2.6 MB     00:00    
+Red Hat Universal Base Image 8 (RPMs) - CodeRea 373 kB/s |  17 kB     00:00    
+Dependencies resolved.
+==============================================================================================
+ Package              Arch    Version                                   Repository        Size
+==============================================================================================
+Installing:
+ httpd                x86_64  2.4.37-43.module+el8.5.0+14530+6f259f31.3 ubi-8-appstream  1.4 M
+Installing dependencies:
+ apr                  x86_64  1.6.3-12.el8                              ubi-8-appstream  130 k
+ apr-util             x86_64  1.6.1-6.el8                               ubi-8-appstream  105 k
+ httpd-filesystem     noarch  2.4.37-43.module+el8.5.0+14530+6f259f31.3 ubi-8-appstream   40 k
+ httpd-tools          x86_64  2.4.37-43.module+el8.5.0+14530+6f259f31.3 ubi-8-appstream  107 k
+ mailcap              noarch  2.1.48-3.el8                              ubi-8-baseos      39 k
+ mod_http2            x86_64  1.15.7-3.module+el8.4.0+8625+d397f3da     ubi-8-appstream  154 k
+ redhat-logos-httpd   noarch  84.5-1.el8                                ubi-8-baseos      29 k
+Installing weak dependencies:
+ apr-util-bdb         x86_64  1.6.1-6.el8                               ubi-8-appstream   25 k
+ apr-util-openssl     x86_64  1.6.1-6.el8                               ubi-8-appstream   27 k
+Enabling module streams:
+ httpd                        2.4                                                             
+
+Transaction Summary
+==============================================================================================
+Install  10 Packages
+
+Total download size: 2.0 M
+Installed size: 5.5 M
+Downloading Packages:
+(1/10): redhat-logos-httpd-84.5-1.el8.noarch.rp 1.0 MB/s |  29 kB     00:00    
+(2/10): mailcap-2.1.48-3.el8.noarch.rpm         1.2 MB/s |  39 kB     00:00    
+(3/10): apr-util-1.6.1-6.el8.x86_64.rpm          14 MB/s | 105 kB     00:00    
+(4/10): apr-util-openssl-1.6.1-6.el8.x86_64.rpm 6.4 MB/s |  27 kB     00:00    
+(5/10): apr-util-bdb-1.6.1-6.el8.x86_64.rpm     3.1 MB/s |  25 kB     00:00    
+(6/10): apr-1.6.3-12.el8.x86_64.rpm              14 MB/s | 130 kB     00:00    
+(7/10): mod_http2-1.15.7-3.module+el8.4.0+8625+ 3.3 MB/s | 154 kB     00:00    
+(8/10): httpd-filesystem-2.4.37-43.module+el8.5  12 MB/s |  40 kB     00:00    
+(9/10): httpd-tools-2.4.37-43.module+el8.5.0+14  23 MB/s | 107 kB     00:00    
+(10/10): httpd-2.4.37-43.module+el8.5.0+14530+6  70 MB/s | 1.4 MB     00:00    
+--------------------------------------------------------------------------------
+Total                                            29 MB/s | 2.0 MB     00:00     
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                        1/1 
+  Installing       : apr-1.6.3-12.el8.x86_64                               1/10 
+  Running scriptlet: apr-1.6.3-12.el8.x86_64                               1/10 
+  Installing       : apr-util-openssl-1.6.1-6.el8.x86_64                   2/10 
+  Installing       : apr-util-bdb-1.6.1-6.el8.x86_64                       3/10 
+  Installing       : apr-util-1.6.1-6.el8.x86_64                           4/10 
+  Running scriptlet: apr-util-1.6.1-6.el8.x86_64                           4/10 
+  Installing       : httpd-tools-2.4.37-43.module+el8.5.0+14530+6f259f3    5/10 
+  Running scriptlet: httpd-filesystem-2.4.37-43.module+el8.5.0+14530+6f    6/10 
+  Installing       : httpd-filesystem-2.4.37-43.module+el8.5.0+14530+6f    6/10 
+  Installing       : mailcap-2.1.48-3.el8.noarch                           7/10 
+  Installing       : redhat-logos-httpd-84.5-1.el8.noarch                  8/10 
+  Installing       : mod_http2-1.15.7-3.module+el8.4.0+8625+d397f3da.x8    9/10 
+  Installing       : httpd-2.4.37-43.module+el8.5.0+14530+6f259f31.3.x8   10/10 
+  Running scriptlet: httpd-2.4.37-43.module+el8.5.0+14530+6f259f31.3.x8   10/10 
+  Verifying        : redhat-logos-httpd-84.5-1.el8.noarch                  1/10 
+  Verifying        : mailcap-2.1.48-3.el8.noarch                           2/10 
+  Verifying        : mod_http2-1.15.7-3.module+el8.4.0+8625+d397f3da.x8    3/10 
+  Verifying        : apr-util-1.6.1-6.el8.x86_64                           4/10 
+  Verifying        : apr-util-openssl-1.6.1-6.el8.x86_64                   5/10 
+  Verifying        : apr-util-bdb-1.6.1-6.el8.x86_64                       6/10 
+  Verifying        : apr-1.6.3-12.el8.x86_64                               7/10 
+  Verifying        : httpd-filesystem-2.4.37-43.module+el8.5.0+14530+6f    8/10 
+  Verifying        : httpd-2.4.37-43.module+el8.5.0+14530+6f259f31.3.x8    9/10 
+  Verifying        : httpd-tools-2.4.37-43.module+el8.5.0+14530+6f259f3   10/10 
+Installed products updated.
+
+Installed:
+  apr-1.6.3-12.el8.x86_64                                                       
+  apr-util-1.6.1-6.el8.x86_64                                                   
+  apr-util-bdb-1.6.1-6.el8.x86_64                                               
+  apr-util-openssl-1.6.1-6.el8.x86_64                                           
+  httpd-2.4.37-43.module+el8.5.0+14530+6f259f31.3.x86_64                        
+  httpd-filesystem-2.4.37-43.module+el8.5.0+14530+6f259f31.3.noarch             
+  httpd-tools-2.4.37-43.module+el8.5.0+14530+6f259f31.3.x86_64                  
+  mailcap-2.1.48-3.el8.noarch                                                   
+  mod_http2-1.15.7-3.module+el8.4.0+8625+d397f3da.x86_64                        
+  redhat-logos-httpd-84.5-1.el8.noarch                                          
+
+Complete!
+Updating Subscription Management repositories.
+Unable to read consumer identity
+Subscription Manager is operating in container mode.
+
+This system is not registered with an entitlement server. You can use subscription-manager to register.
+
+25 files removed
+STEP 5/7: RUN echo "Hello from Containerfile" > /var/www/html/index.html
+STEP 6/7: EXPOSE 80
+STEP 7/7: CMD ["httpd", "-D", "FOREGROUND" ]
+COMMIT do180/apache
+Getting image source signatures
+Copying blob 2897998200aa skipped: already exists  
+Copying blob 5a40975f1c00 skipped: already exists  
+Copying blob c9cc53898df9 done  
+Copying config d7c80c4016 done  
+Writing manifest to image destination
+Storing signatures
+--> d7c80c40168
+Successfully tagged localhost/do180/apache:latest
+d7c80c401688990fa7ea349c973aba460c790de7b9d9ceb4842ec8b2a12741d6
+[student@workstation dockerfile-create]$
+
+#############################
+#############################
+#############################
+
+OCP
+
+
+[student@workstation ~]$ oc get projects
+NAME                     DISPLAY NAME   STATUS
+faulqs-mysql-openshift                  Active
+[student@workstation ~]$
+
+
+
+#Create new-app 
+[student@workstation ~]$ oc new-app \
+> --template=mysql-persistent \
+> -p MYSQL_USER=user1 -p MYSQL_PASSWORD=mypa55 -p MYSQL_DATABASE=testdb \
+> -p MYSQL_ROOT_PASSWORD=r00tpa55 -p VOLUME_CAPACITY=10Gi
+--> Deploying template "openshift/mysql-persistent" to project faulqs-mysql-openshift
+
+     MySQL
+     ---------
+     MySQL database service, with persistent storage. For more information about using this template, including OpenShift considerations, see https://github.com/sclorg/mysql-container/blob/master/8.0/root/usr/share/container-scripts/mysql/README.md.
+     
+     NOTE: Scaling to more than one replica is not supported. You must have persistent volumes available in your cluster to use this template.
+
+     The following service(s) have been created in your project: mysql.
+     
+            Username: user1
+            Password: mypa55
+       Database Name: testdb
+      Connection URL: mysql://mysql:3306/
+     
+     For more information about using this template, including OpenShift considerations, see https://github.com/sclorg/mysql-container/blob/master/8.0/root/usr/share/container-scripts/mysql/README.md.
+
+     * With parameters:
+        * Memory Limit=512Mi
+        * Namespace=openshift
+        * Database Service Name=mysql
+        * MySQL Connection Username=user1
+        * MySQL Connection Password=mypa55
+        * MySQL root user Password=r00tpa55
+        * MySQL Database Name=testdb
+        * Volume Capacity=10Gi
+        * Version of MySQL Image=8.0-el8
+
+--> Creating resources ...
+    secret "mysql" created
+    service "mysql" created
+    persistentvolumeclaim "mysql" created
+    deploymentconfig.apps.openshift.io "mysql" created
+--> Success
+    Application is not exposed. You can expose services to the outside world by executing one or more of the commands below:
+     'oc expose service/mysql' 
+    Run 'oc status' to view your app.
+[student@workstation ~]$   
+
+
+[student@workstation ~]$ oc get pods
+NAME             READY   STATUS      RESTARTS   AGE
+mysql-1-deploy   0/1     Completed   0          4m1s
+mysql-1-zppdq    1/1     Running     0          3m58s
+[student@workstation ~]$
+
+
+[student@workstation ~]$ oc status
+In project faulqs-mysql-openshift on server https://api.eu410.prod.nextcle.com:6443
+
+svc/mysql - 172.30.8.254:3306
+  dc/mysql deploys openshift/mysql:8.0-el8 
+    deployment #1 deployed 7 minutes ago - 1 pod
+
+View details with 'oc describe <resource>/<name>' or list resources with 'oc get all'.
+[student@workstation ~]$ 
+ 
+
+
+[student@workstation ~]$ oc describe service mysql
+Name:              mysql
+Namespace:         faulqs-mysql-openshift
+Labels:            app=mysql-persistent
+                   app.kubernetes.io/component=mysql-persistent
+                   app.kubernetes.io/instance=mysql-persistent
+                   template=mysql-persistent-template
+Annotations:       openshift.io/generated-by: OpenShiftNewApp
+                   template.openshift.io/expose-uri: mysql://{.spec.clusterIP}:{.spec.ports[?(.name=="mysql")].port}
+Selector:          name=mysql
+Type:              ClusterIP
+IP Family Policy:  SingleStack
+IP Families:       IPv4
+IP:                172.30.8.254
+IPs:               172.30.8.254
+Port:              mysql  3306/TCP
+TargetPort:        3306/TCP
+Endpoints:         10.129.4.213:3306
+Session Affinity:  None
+Events:            <none>
+[student@workstation ~]$ 
+
+
+
+
+
+
+
+
+
