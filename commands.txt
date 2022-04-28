@@ -14,4 +14,125 @@ podman run -d -p 8080 httpd
 #procurar containers
 podman search httpd
 
+[student@workstation DO180-apps]$ podman login registry.redhat.io
+Username: virgilioempty
+Password: 
+Login Succeeded!
+[student@workstation DO180-apps]$ 
+
+#Start container from the red hat container catalog mysql image
+[student@workstation DO180-apps]$ podman run --name mysql-basic -e MYSQL_USER=user1 -e MYSQL_PASSWORD=mypa55 -e MYSQL_DATABASE=items -e MYSQL_ROOT_PASSWORD=r00tpa55 -d registry.redhat.io/rhel8/mysql-80:1
+Trying to pull registry.redhat.io/rhel8/mysql-80:1...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob 0a21bb5475ea skipped: already exists  
+Copying blob 38dd71adcfc1 skipped: already exists  
+Copying blob 408d72b5afe1 skipped: already exists  
+Copying blob 268851a48bf7 done  
+Copying config b85986059f done  
+Writing manifest to image destination
+Storing signatures
+eeab8fe5a945f3929a22a0457b8d2a208bd7b05d0ec9e1e3cd2452e2ded0d096
+[student@workstation DO180-apps]$ 
+
+
+[student@workstation DO180-apps]$ podman run --name mysql-basic -e MYSQL_USER=user1 -e MYSQL_PASSWORD=mypa55 -e MYSQL_DATABASE=items -e MYSQL_ROOT_PASSWORD=r00tpa55 -d registry.redhat.io/rhel8/mysql-80:1
+Trying to pull registry.redhat.io/rhel8/mysql-80:1...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob 0a21bb5475ea skipped: already exists  
+Copying blob 38dd71adcfc1 skipped: already exists  
+Copying blob 408d72b5afe1 skipped: already exists  
+Copying blob 268851a48bf7 done  
+Copying config b85986059f done  
+Writing manifest to image destination
+Storing signatures
+eeab8fe5a945f3929a22a0457b8d2a208bd7b05d0ec9e1e3cd2452e2ded0d096
+[student@workstation DO180-apps]$ 
+
+
+[student@workstation DO180-apps]$ sudo podman run --rm --name asroot -ti registry.access.redhat.com/ubi8:latest /bin/bash
+Trying to pull registry.access.redhat.com/ubi8:latest...
+Getting image source signatures
+Checking if image destination supports signatures
+Copying blob 0a21bb5475ea done  
+Copying blob 38dd71adcfc1 done  
+Copying config e0c227e997 done  
+Writing manifest to image destination
+Storing signatures
+[root@0e31e6d8b0a7 /]#
+
+
+[student@workstation DO180-apps]$ podman run -d -p 8080:80 --name httpd-basic quay.io/redhattraining/httpd-parent:2.4
+Trying to pull quay.io/redhattraining/httpd-parent:2.4...
+Getting image source signatures
+Copying blob a3ed95caeb02 done  
+Copying blob a3ed95caeb02 done  
+Copying blob a3ed95caeb02 done  
+Copying blob 787f47dbeaac done  
+Copying blob 08b8c9fdec44 done  
+Copying blob 6a5240d60dc4 done  
+Copying blob a3ed95caeb02 skipped: already exists  
+Copying blob a3ed95caeb02 skipped: already exists  
+Copying blob a3ed95caeb02 skipped: already exists  
+Copying blob 408208567b9a done  
+Writing manifest to image destination
+Storing signatures
+38bbfe32612b4e87c78bce7c85980e0fef75ba0a8125ff57f8c697fbc7434f9c
+[student@workstation DO180-apps]$ 
+ 
+[student@workstation DO180-apps]$ podman port -l
+80/tcp -> 0.0.0.0:8080
+[student@workstation DO180-apps]$
+
+0.0.0.0:8080
+
+#Listar todos os containers
+[student@workstation DO180-apps]$ podman ps -a
+CONTAINER ID  IMAGE                                            COMMAND               CREATED      STATUS                     PORTS                    NAMES
+daa1dcec7584  registry.access.redhat.com/rhel:latest           echo Hello world!     3 hours ago  Exited (0) 3 hours ago                              beautiful_robinson
+763b88ce04f7  registry.access.redhat.com/rhel:latest           echo Hello world!     3 hours ago  Exited (0) 3 hours ago                              keen_mcnulty
+ffff427437e3  docker.io/library/httpd:latest                   httpd-foreground      3 hours ago  Exited (0) 16 minutes ago  0.0.0.0:43265->80/tcp    sharp_nobel
+014ca6a1e6e3  registry.access.redhat.com/ubi8/httpd-24:latest  /usr/bin/run-http...  2 hours ago  Exited (0) 16 minutes ago  0.0.0.0:42035->8080/tcp  stupefied_noether
+[student@workstation DO180-apps]$
+
+#Apagar container
+[student@workstation DO180-apps]$ podman rm ffff427437e3
+ffff427437e3771eb009552af25417c0be159ce790d0ce77d752a54196ffa13c
+
+
+#Apagar image
+[student@workstation DO180-apps]$ podman rmi docker.io/library/httpd:latest
+Untagged: docker.io/library/httpd:latest
+Deleted: c30a467716957ab3adabf990785d220056949d80b3aa46d90de3ea44d532b03e
+[student@workstation DO180-apps]$ 
+
+#Permissao para o uid 27 no folder /home/student/dbfiles
+[student@workstation ~]$ podman unshare chown -R 27:27 /home/student/dbfiles
+
+#Permissao do selinux para a pasta
+[student@workstation ~]$ sudo semanage fcontext -a -t container_file_t '/home/student/dbfiles/(/.*)?'
+[student@workstation ~]$
+#Aplicar novas permissões
+[student@workstation ~]$ sudo restorecon -Rv /home/student/dbfiles
+[student@workstation ~]$ 
+
+#Configura variavel 
+[student@workstation ~]$ podman run --name mysql -d -e MYSQL_USER=user1 -e MYSQL_PASSWORD=mypa55 -e MYSQL_DATABASE=items -e MYSQL_ROOT_PASSWORD=r00tpa55 registry.redhat.io/rhel8/mysql-80:1
+a04919fcdebd33d5573b646f5b918a830484947ce2c7b9f0268c1881d3389fe9
+[student@workstation ~]$ 
+
+#Montar volume persistent
+[student@workstation ~]$ podman run --name mysql -d -e MYSQL_USER=user1 -e MYSQL_PASSWORD=mypa55 -e MYSQL_DATABASE=items -e MYSQL_ROOT_PASSWORD=r00tpa55 registry.redhat.io/rhel8/mysql-80:1
+a04919fcdebd33d5573b646f5b918a830484947ce2c7b9f0268c1881d3389fe9
+[student@workstation ~]$ 
+
+
+#Validar permissao com o podman
+[student@workstation ~]$ podman unshare ls -ld /home/student/local/mysql/items/
+drwxr-x---. 2 27 27 6 Apr 27 10:31 /home/student/local/mysql/items/
+[student@workstation ~]$ 
+
+
+
 #############################
